@@ -1,0 +1,21 @@
+# Binarios y compilados
+bin/
+oauth-server
+*.exe
+*.o
+
+# Claves y Secretos (CRÍTICO)
+keys/
+*.pem
+*.key
+*.crt
+
+# Variables de entorno local
+.env
+
+# Directorios de IDEs
+.vscode/
+.idea/
+
+# Temporales de Go
+vendor/

@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oauth-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: oauth-server
+  template:
+    metadata:
+      labels:
+        app: oauth-server
+    spec:
+      containers:
+      - name: oauth-server
+        image: oauth-server:latest  # <--- CAMBIAR A V3
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8080
+        env:
+        - name: DB_HOST
+          value: "auth-db"
+        - name: DB_USER
+          value: "admin"
+        - name: DB_PASSWORD
+          value: "passwordSeguraDB"
+        - name: DB_NAME
+          value: "oauth_db"
+        - name: PRIVATE_KEY_PATH
+          value: "/etc/oauth/keys/private.pem" # Le decimos a Go dónde buscar
+        volumeMounts:             # <--- NUEVO
+        - name: keys-vol
+          mountPath: "/etc/oauth/keys"
+          readOnly: true
+      volumes:                    # <--- NUEVO (Al nivel de 'containers')
+      - name: keys-vol
+        secret:
+          secretName: oauth-keys  # El nombre del secreto que creamos en el paso 1
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: oauth-service
+spec:
+  selector:
+    app: oauth-server
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
